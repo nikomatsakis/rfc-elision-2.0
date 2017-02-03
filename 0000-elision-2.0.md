@@ -37,9 +37,46 @@ Why are we doing this? What use cases does it support? What is the expected outc
 # Detailed design
 [design]: #detailed-design
 
-This is the bulk of the RFC. Explain the design in enough detail for somebody familiar
-with the language to understand, and for somebody familiar with the compiler to implement.
-This should get into specifics and corner-cases, and include examples of how the feature is used.
+There are a number of proposed changes that all work in tandem to
+achieve the full effect, but which are somewhat independent. This
+section is therefore broken up to discuss them separately.
+
+### Inferring outlives annotations
+
+- Global analysis performed at same time as variance
+- Should be a fairly straightforward data flow based on the WF constraints
+
+### Permit eliding lifetimes in struct/enum/union declarations and type aliases
+
+- Only if type has exactly one parameter
+- Elided lifetime defaults to that single lifetime parameter
+
+### Allow single-tick notation to be used in struct/enum/union declarations and type aliases
+
+- so `struct Foo<', T>` is as if you wrote `struct Foo<'a, T>`
+- note that this relies on inferring outlives annotations to work
+- Also usable in type aliases: `type Ref<', T> = &T`
+- Why not trait declarations?
+    - I can't find a place you might want to reference it
+        - e.g., `trait Foo<'> { fn foo(&self) }`, the `&self` already has an elision
+        - only place I can imagine is `trait Foo<', T> where &T: Eq` or something,
+          or perhaps `trait Foo<'> { type X = &i32; }` but both of those seem
+          pretty weak
+
+### Allow single-tick notation to be used in types
+
+- Meaning of `Foo<', T>` in each context:
+    - struct, union, or enum body and type aliases
+    - static or const (becomes `'static`, as per RFC 1623
+    - fn arguments
+    - fn return type
+    - fn body
+    - (where else can types appear?)
+- In general, the rule is "what it would mean today if you elided
+  everything".  If the case of struct/union/enum body, full elision is
+  not permitted, but we allow it as part of this RFC.
+  
+### Deprecate fully elided lifetimes on structs
 
 # How We Teach This
 [how-we-teach-this]: #how-we-teach-this
