@@ -6,7 +6,28 @@
 # Summary
 [summary]: #summary
 
-One para explanation of the feature.
+A set of related changes that aim to lighten the annotation burden
+associated with structs that contain references, as well as tempering
+some confusing cases that arise with the current elision rules:
+
+- Inferring the `T: 'a` annotations that are currently required on structs.
+- Permit eliding lifetimes in structs if the struct has a single
+  lifetime parameter.
+- Introducing a "single tick" notation `Foo<'>` that can be used to
+  indicate the presence of elided lifetimes in various settings:
+  - **Struct declarations:** such as `struct Iter<', T> { vec: &[T], index: usize }`.
+  - **Elided lifetime arguments in function signatures:**
+      - Rather than writing `fn foo(&self) -> Ref<i32>`, one might write
+        `fn foo(&self) -> Ref<', i32>`, which makes it clear that `self` will remain
+        borrowed so long as the return value is in used.
+      - Similarly, rather than writing `fn foo(&self, r: Ref<i32>)`,
+        one might write `fn foo(&self, r: Ref<', i32>)`, which makes
+        it clear `Ref` carries lifetime data.
+      - In these contexts, the `'` can "stand-in" for any number of lifetime
+        parameters.
+- Deprecate fully eliding the lifetime parameters on structs (e.g.,
+  `Ref<i32>`) in favor of `Ref<', i32>`.
+      - FEEDBACK REQUESTED: Everywhere? Or just in fn arguments?
 
 # Motivation
 [motivation]: #motivation
