@@ -3,6 +3,12 @@
 - RFC PR: (leave this empty)
 - Rust Issue: (leave this empty)
 
+# TODO
+
+- New constraint:
+    - We want to support trait objects / impl trait
+        - `Box<Trait + '>`?
+
 # Summary
 [summary]: #summary
 
@@ -97,7 +103,12 @@ Why should we *not* do this?
 # Alternatives
 [alternatives]: #alternatives
 
-What other designs have been considered? What is the impact of not doing this?
+- `'_` to indicate "elided lifetime here"
+    - Looks obscure
+    - Might be confused with `_`, which means "infer type here" at present
+- Other syntax in place of `Foo<', T>`: `Foo<&, T>`
+- Permit references to have a prefix/suffix, with `'` in the middle,
+  like `Foo<', 'a, T>` or `Foo<'a, ', 'b, T>`.
 
 # Unresolved questions
 [unresolved]: #unresolved-questions
